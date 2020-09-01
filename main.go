@@ -31,13 +31,22 @@ func interfacesFromPackage(patterns ...string) ([]*types.TypeName, error) {
 
 	ifaces := []*types.TypeName{}
 
-	spkgs := make([]*packages.Package, 0, len(pkgs[0].Imports)+1)
-	spkgs = append(spkgs, pkgs[0])
-	for _, imp := range pkgs[0].Imports {
-		spkgs = append(spkgs, imp)
+	// selected package
+	for _, name := range pkgs[0].Types.Scope().Names() {
+		obj, ok := pkgs[0].Types.Scope().Lookup(name).(*types.TypeName)
+		if obj == nil || !ok {
+			continue
+		}
+
+		if !types.IsInterface(obj.Type()) {
+			continue
+		}
+
+		ifaces = append(ifaces, obj)
 	}
 
-	for _, p := range spkgs {
+	// imported pacakges
+	for _, p := range pkgs[0].Imports {
 		for _, name := range p.Types.Scope().Names() {
 			obj, ok := p.Types.Scope().Lookup(name).(*types.TypeName)
 			if obj == nil || !ok {
