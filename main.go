@@ -52,6 +52,10 @@ func interfacesFromPackage(patterns ...string) ([]*types.TypeName, error) {
 		}
 	}
 
+	// Universe Scoop
+	obj, _ := types.Universe.Lookup("error").(*types.TypeName)
+	ifaces = append(ifaces, obj)
+
 	return ifaces, nil
 }
 
