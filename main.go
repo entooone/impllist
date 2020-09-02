@@ -16,7 +16,11 @@ var (
 	flagType string
 )
 
-func interfacesFromPackage(patterns ...string) ([]*types.TypeName, error) {
+var (
+	errorIface = types.Universe.Lookup("error").(*types.TypeName)
+)
+
+func interfacesFromPackage(patterns ...string) ([]types.Object, error) {
 	mode := packages.NeedSyntax | packages.NeedTypes | packages.NeedDeps | packages.NeedTypesInfo | packages.NeedImports
 	cfg := &packages.Config{Mode: mode}
 
@@ -29,12 +33,12 @@ func interfacesFromPackage(patterns ...string) ([]*types.TypeName, error) {
 		return nil, errors.New("very few packages")
 	}
 
-	ifaces := []*types.TypeName{}
+	ifaces := []types.Object{}
 
 	// selected package
 	for _, name := range pkgs[0].Types.Scope().Names() {
-		obj, ok := pkgs[0].Types.Scope().Lookup(name).(*types.TypeName)
-		if obj == nil || !ok {
+		obj := pkgs[0].Types.Scope().Lookup(name)
+		if obj == nil {
 			continue
 		}
 
@@ -48,8 +52,8 @@ func interfacesFromPackage(patterns ...string) ([]*types.TypeName, error) {
 	// imported pacakges
 	for _, p := range pkgs[0].Imports {
 		for _, name := range p.Types.Scope().Names() {
-			obj, ok := p.Types.Scope().Lookup(name).(*types.TypeName)
-			if obj == nil || !ok {
+			obj := p.Types.Scope().Lookup(name)
+			if obj == nil {
 				continue
 			}
 
@@ -62,13 +66,12 @@ func interfacesFromPackage(patterns ...string) ([]*types.TypeName, error) {
 	}
 
 	// Universe Scoop
-	obj, _ := types.Universe.Lookup("error").(*types.TypeName)
-	ifaces = append(ifaces, obj)
+	ifaces = append(ifaces, errorIface)
 
 	return ifaces, nil
 }
 
-func typeNameObj(pkg string, name string) (*types.TypeName, error) {
+func typeNameObj(pkg string, name string) (types.Object, error) {
 	mode := packages.NeedSyntax | packages.NeedTypes | packages.NeedDeps | packages.NeedTypesInfo | packages.NeedImports
 	cfg := &packages.Config{Mode: mode}
 	pkgs, err := packages.Load(cfg, pkg)
@@ -76,8 +79,8 @@ func typeNameObj(pkg string, name string) (*types.TypeName, error) {
 		return nil, fmt.Errorf("load: %w", err)
 	}
 
-	obj, ok := pkgs[0].Types.Scope().Lookup(name).(*types.TypeName)
-	if obj == nil || !ok {
+	obj := pkgs[0].Types.Scope().Lookup(name)
+	if obj == nil {
 		return nil, fmt.Errorf("lookup: not found type %s.%s", pkg, name)
 	}
 
