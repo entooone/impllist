@@ -2,7 +2,7 @@
 
 ユーザ定義型から実装している interface の一覧を取得する。また、ユーザ定義の interface からその interface を実装している型の一覧を取得する
 
-# TODO
+## TODO
 
 - [ ] ユーザ定義型からその型が実装している interface の一覧を取得する
 - [ ] ユーザ定義の interface からその interface を実装している型の一覧を取得する
@@ -13,15 +13,15 @@
     - 調べるユーザ定義型が定義されたパッケージが import しているものを含める
 - [ ] カーソルの位置を取得してその下にある型について一覧を取得する
 
-# Install
+## Install
 
 ```
 $ go get -u github.com/entooone/impllist
 ```
 
-# How to use
+## How to use
 
-## `os.File` が実装している interface の一覧を取得する
+### `os.File` が実装している interface の一覧を取得する
 
 ```
 $ impllist os.File
