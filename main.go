@@ -13,7 +13,8 @@ import (
 )
 
 var (
-	flagType string
+	flagTargetPkg          string
+	flagIncludeImportedPkg bool
 )
 
 var (
@@ -71,7 +72,7 @@ func interfacesFromPackage(patterns ...string) ([]types.Object, error) {
 	return ifaces, nil
 }
 
-func typeNameObj(pkg string, name string) (types.Object, error) {
+func typeObjFromName(pkg string, name string) (types.Object, error) {
 	mode := packages.NeedSyntax | packages.NeedTypes | packages.NeedDeps | packages.NeedTypesInfo | packages.NeedImports
 	cfg := &packages.Config{Mode: mode}
 	pkgs, err := packages.Load(cfg, pkg)
@@ -88,12 +89,14 @@ func typeNameObj(pkg string, name string) (types.Object, error) {
 }
 
 func run(args []string) error {
-	if flagType == "" {
-		return errors.New("must set -t flag")
+	if len(args) < 1 {
+		return errors.New("invalid arguments")
 	}
 
-	typ := strings.TrimLeft(filepath.Ext(flagType), ".")
-	pkg := strings.TrimRight(strings.TrimSuffix(flagType, typ), ".")
+	targetType := args[0]
+
+	typ := strings.TrimLeft(filepath.Ext(targetType), ".")
+	pkg := strings.TrimRight(strings.TrimSuffix(targetType, typ), ".")
 	if pkg == "" || typ == "" {
 		return errors.New("invalid type name")
 	}
@@ -103,7 +106,7 @@ func run(args []string) error {
 		return err
 	}
 
-	obj, err := typeNameObj(pkg, typ)
+	obj, err := typeObjFromName(pkg, typ)
 	if err != nil {
 		return err
 	}
@@ -123,7 +126,8 @@ func run(args []string) error {
 }
 
 func init() {
-	flag.StringVar(&flagType, "t", "", "type name")
+	flag.StringVar(&flagTargetPkg, "t", "", "packages included in the search (',' separated list)")
+	flag.BoolVar(&flagIncludeImportedPkg, "c", true, "")
 	flag.Parse()
 }
 
