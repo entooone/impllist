@@ -1,5 +1,7 @@
 # impllist
 
+https://github.com/nu50218/impls に開発を移行したため Archive する。
+
 ユーザ定義型から実装している interface の一覧を取得する。また、ユーザ定義の interface からその interface を実装している型の一覧を取得する
 
 ## TODO
